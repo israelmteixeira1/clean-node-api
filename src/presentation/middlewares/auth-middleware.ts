@@ -20,6 +20,9 @@ export class AuthMiddleware implements Middleware {
             }
             return forbidden(new AccessDeniedError())
         } catch (error) {
+            if (['JsonWebTokenError', 'TokenExpiredError', 'NotBeforeError'].includes(error?.name)) {
+                return forbidden(new AccessDeniedError())
+            }
             return serverError(error)
         }
     }

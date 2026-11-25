@@ -6,7 +6,14 @@ export const MongoHelper = {
 
   async connect(uri: string): Promise<void> {
     this.uri = uri
-    this.client = await MongoClient.connect(uri)
+    const client = await MongoClient.connect(uri)
+    try {
+      await client.db().collection('surveyResponses').createIndex({ surveyId: 1, accountId: 1 }, { unique: true })
+      this.client = client
+    } catch (error) {
+      await client.close()
+      throw error
+    }
   },
 
   async disconnect(): Promise<void> {

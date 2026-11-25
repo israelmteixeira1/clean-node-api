@@ -4,6 +4,12 @@ import { makeLoginController } from "../factories/controllers/login/login-contro
 import { makeSignupController } from "../factories/controllers/signup/signup-controller-factory";
 
 export default (router: Router): void => {
-  router.post('/signup', adaptRoute(makeSignupController()))
-  router.post('/login', adaptRoute(makeLoginController()))
+  const validateStrings = (fields: string[], allowWhitespace: string[] = []) => (req, res, next) => {
+    if (!req.body || fields.some(field => typeof req.body[field] !== 'string' || !(allowWhitespace.includes(field) ? req.body[field] : req.body[field].trim()))) {
+      res.status(400).json({ error: 'Invalid request fields' }); return
+    }
+    next()
+  }
+  router.post('/signup', validateStrings(['name', 'email', 'password', 'passwordConfirmation']), adaptRoute(makeSignupController()))
+  router.post('/login', validateStrings(['email', 'password'], ['password']), adaptRoute(makeLoginController()))
 }

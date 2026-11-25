@@ -53,6 +53,13 @@ describe('Login Routes', () => {
         .expect(200)
     })
 
+    test('authenticates a legacy password consisting only of spaces without changing it', async () => {
+      const password = await hash('   ', 12)
+      await accountCollection.insertOne({ name: 'Legacy', email: 'legacy@example.com', password })
+      await request(app).post('/api/login').send({ email: 'legacy@example.com', password: '   ' }).expect(200)
+      await request(app).post('/api/login').send({ email: 'legacy@example.com', password: '  ' }).expect(401)
+    })
+
     test('Should return 401 on login', async () => {
       await request(app)
         .post('/api/login')
